@@ -26,8 +26,8 @@ dependencies = [
 if get_dist('cupy-cuda102') is None and get_dist('cupy-cuda110') is None and get_dist('cupy-cuda111') is None and \
         get_dist('cupy-cuda112') is None and get_dist('cupy-cuda113') is None and get_dist('cupy-cuda114') is None and \
         get_dist('cupy-cuda115') is None and get_dist('cupy-cuda116') is None:
-    dependencies.append("cupy-cuda113>=10.0.0")
-
+    #dependencies.append("cupy-cuda113>=10.0.0")
+    dependencies.append("cupy-cuda12x>=10.0.0")
 setup(
     name='opticalflow3d',
     version="0.3.2",
