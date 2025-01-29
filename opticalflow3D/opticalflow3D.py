@@ -165,10 +165,16 @@ class Farneback3D:
                                                       threadsperblock=threadsperblock)
             cp.cuda.Stream.null.synchronize()
 
-            output_vx = vx.get()
-            output_vy = vy.get()
-            output_vz = vz.get()
-            output_confidence = confidence.get()
+            # output_vx = vx.get()
+            # output_vy = vy.get()
+            # output_vz = vz.get()
+            # output_confidence = confidence.get()
+            
+            # Joey edit: remove numpy conversion
+            output_vx = vx
+            output_vy = vy
+            output_vz = vz
+            output_confidence = confidence
 
         return output_vz, output_vy, output_vx, output_confidence
 
