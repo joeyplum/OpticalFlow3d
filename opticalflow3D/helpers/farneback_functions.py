@@ -421,6 +421,7 @@ def update_flow(h0, h1, h2, g00, g01, g02, g11, g12, g22,
                        h0[z, y, x] * (g01[z, y, x] * g12[z, y, x] - g02[z, y, x] * g11[z, y, x])) / det
 
 
+
 def farneback_3d(image1, image2, iters: int, num_levels: int,
                  scale: float = 0.5, spatial_size: int = 9, sigma_k: float = 0.15,
                  filter_type: str = "box", filter_size: int = 5,
@@ -451,7 +452,8 @@ def farneback_3d(image1, image2, iters: int, num_levels: int,
     assert filter_type.lower() in ["gaussian", "box"]
     if filter_type.lower() == "gaussian":
         def filter_fn(x):
-            return cupyx.scipy.ndimage.gaussian_filter(x, filter_size / 2 * 0.3)
+            # return cupyx.scipy.ndimage.gaussian_filter(x, filter_size / 2 * 0.3)
+            return gaussian_faster(x, filter_size)
     elif filter_type.lower() == "box":
         def filter_fn(x):
             return cupyx.scipy.ndimage.uniform_filter(x, size=filter_size)
@@ -554,3 +556,19 @@ def farneback_3d(image1, image2, iters: int, num_levels: int,
 
             cp.cuda.Stream.null.synchronize()
     return vx, vy, vz, confidence
+
+# JWP: use a custom Gaussian filter for speed
+from cupyx.scipy.ndimage import correlate1d
+def gaussian_faster(x, filter_size: int = 5):
+    """Fast separable 3D Gaussian filter using 1D convolution."""
+    sigma = filter_size / 2 * 0.3
+    radius = filter_size // 2
+    ax = cp.arange(-radius, radius + 1, dtype=cp.float32)
+    kernel = cp.exp(-0.5 * (ax / sigma) ** 2)
+    kernel /= kernel.sum()
+
+    # Apply separable 1D convolution in z, y, x
+    x = correlate1d(x, kernel, axis=0, mode='mirror')
+    x = correlate1d(x, kernel, axis=1, mode='mirror')
+    x = correlate1d(x, kernel, axis=2, mode='mirror')
+    return x
