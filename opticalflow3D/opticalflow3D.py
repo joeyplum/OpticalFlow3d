@@ -183,7 +183,7 @@ class Farneback3D:
             # Print the parameters used for the Farneback algorithm
             toc = time.time()
             print(
-            f"Iters: {self.iters} | Levels: {self.num_levels} | Scale: {self.scale} | Kernel: {self.spatial_size} | Filter: {self.filter_type}-{self.filter_size} | Presmoothing: {self.presmoothing} | Time: {toc - tic:.2f}s",
+            f"Iters: {self.iters} | Levels: {self.num_levels} | Scale: {self.scale} | Kernel: {self.spatial_size} | Filter: {self.filter_type}-{self.filter_size} | Presmoothing: {self.presmoothing} | Time: {toc - tic:.4f}s",
             flush=True)
 
         return output_vz, output_vy, output_vx, output_confidence
