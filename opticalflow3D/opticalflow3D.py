@@ -8,6 +8,8 @@ from .helpers.farneback_functions import farneback_3d
 from .helpers.helpers import get_positions
 from .helpers.pyrlk_functions import pyrlk_3d
 
+import time
+
 
 class Farneback3D:
     """Farneback3D class used to instantiate the algorithm with its parameters.
@@ -76,13 +78,15 @@ class Farneback3D:
             output_vx (np.ndarray): array containing the displacements in the z direction
             output_confidence (np.ndarray): array containing the calculated confidence of the Farneback algorithm
         """
+        tic = time.time()
+        
         if total_vol is None:
             total_vol = image1.shape - np.array(start_point)
 
-        print("Running 3D Farneback optical flow with the following parameters:")
-        print(
-            f"Iters: {self.iters} | Levels: {self.num_levels} | Scale: {self.scale} | Kernel: {self.spatial_size} | Filter: {self.filter_type}-{self.filter_size} | Presmoothing: {self.presmoothing}",
-            flush=True)
+        # print("Running 3D Farneback optical flow with the following parameters:")
+        # print(
+        #     f"Iters: {self.iters} | Levels: {self.num_levels} | Scale: {self.scale} | Kernel: {self.spatial_size} | Filter: {self.filter_type}-{self.filter_size} | Presmoothing: {self.presmoothing}",
+        #     flush=True)
 
         output_vx = np.zeros(total_vol, dtype=np.float32)
         output_vy = np.zeros(total_vol, dtype=np.float32)
@@ -175,6 +179,12 @@ class Farneback3D:
             output_vy = vy
             output_vz = vz
             output_confidence = confidence
+            
+            # Print the parameters used for the Farneback algorithm
+            toc = time.time()
+            print(
+            f"Iters: {self.iters} | Levels: {self.num_levels} | Scale: {self.scale} | Kernel: {self.spatial_size} | Filter: {self.filter_type}-{self.filter_size} | Presmoothing: {self.presmoothing} | Time: {toc - tic:.2f}s",
+            flush=True)
 
         return output_vz, output_vy, output_vx, output_confidence
 
