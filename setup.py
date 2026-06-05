@@ -1,40 +1,26 @@
 from setuptools import setup, find_packages
 from os import path
-from importlib.metadata import distribution, PackageNotFoundError
 
 with open("README.md", "r") as file:
     long_description = file.read()
 
 _dir = path.dirname(__file__)
 
-
-def is_installed(pkgname):
-    try:
-        distribution(pkgname)
-        return True
-    except PackageNotFoundError:
-        return False
-
+# NOTE on CuPy:
+# CuPy is intentionally NOT listed as a dependency here. It must be
+# provided by the surrounding environment (e.g. conda-forge `cupy`,
+# which on CUDA 12 ships a cuDNN-enabled build). Declaring a
+# cupy-cudaXx wheel here risks installing a SECOND CuPy alongside the
+# conda one, which produces the "multiple CuPy packages are installed"
+# conflict and a broken cuDNN binding. Install CuPy via your env file.
 
 dependencies = [
     "numpy>=1.17.0",
     "numba>=0.47.0",
     "scikit-image>=0.17.1",
     "scipy>=1.6.3",
-    "tqdm>=4.50.0"
+    "tqdm>=4.50.0",
 ]
-
-# Only pull in a CuPy wheel if the environment doesn't already provide one.
-# The list includes modern CUDA 12.x / 13.x wheel names and the generic
-# 'cupy' package so a conda/pip-provided CuPy is correctly detected and we
-# don't accidentally install a second, conflicting CuPy build.
-_cupy_packages = (
-    "cupy", "cupy-cuda13x", "cupy-cuda12x",
-    "cupy-cuda102", "cupy-cuda110", "cupy-cuda111", "cupy-cuda112",
-    "cupy-cuda113", "cupy-cuda114", "cupy-cuda115", "cupy-cuda116",
-)
-if not any(is_installed(pkg) for pkg in _cupy_packages):
-    dependencies.append("cupy-cuda13x>=13.6.0")
 
 setup(
     name='opticalflow3d',
