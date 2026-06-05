@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 from os import path
-from pkg_resources import DistributionNotFound, get_distribution
+from importlib.metadata import distribution, PackageNotFoundError
 
 with open("README.md", "r") as file:
     long_description = file.read()
@@ -8,11 +8,12 @@ with open("README.md", "r") as file:
 _dir = path.dirname(__file__)
 
 
-def get_dist(pkgname):
+def is_installed(pkgname):
     try:
-        return get_distribution(pkgname)
-    except DistributionNotFound:
-        return None
+        distribution(pkgname)
+        return True
+    except PackageNotFoundError:
+        return False
 
 
 dependencies = [
@@ -23,13 +24,18 @@ dependencies = [
     "tqdm>=4.50.0"
 ]
 
-if get_dist('cupy-cuda102') is None and get_dist('cupy-cuda110') is None and get_dist('cupy-cuda111') is None and \
-        get_dist('cupy-cuda112') is None and get_dist('cupy-cuda113') is None and get_dist('cupy-cuda114') is None and \
-        get_dist('cupy-cuda115') is None and get_dist('cupy-cuda116') is None:
-    #dependencies.append("cupy-cuda113>=10.0.0")
-    # dependencies.append("cupy-cuda12x>=10.0.0") # Commented out by JWP as it is assumed that the cupy equivalent version of cupy-cuda12x was already installed in conda 
+# Only pull in a CuPy wheel if the environment doesn't already provide one.
+# The list includes modern CUDA 12.x / 13.x wheel names and the generic
+# 'cupy' package so a conda/pip-provided CuPy is correctly detected and we
+# don't accidentally install a second, conflicting CuPy build.
+_cupy_packages = (
+    "cupy", "cupy-cuda13x", "cupy-cuda12x",
+    "cupy-cuda102", "cupy-cuda110", "cupy-cuda111", "cupy-cuda112",
+    "cupy-cuda113", "cupy-cuda114", "cupy-cuda115", "cupy-cuda116",
+)
+if not any(is_installed(pkg) for pkg in _cupy_packages):
     dependencies.append("cupy-cuda13x>=13.6.0")
-    # dependencies.append("cupy") # Added by JWP -- see above
+
 setup(
     name='opticalflow3d',
     version="0.3.2",
@@ -40,7 +46,6 @@ setup(
     author='Xianbin Yong',
     author_email='xianbin.yong13@sps.nus.edu.sg',
     url='https://gitlab.com/xianbin.yong13/opticalflow3d',
-
     packages=find_packages(),
     license="GPLv3",
     classifiers=[
